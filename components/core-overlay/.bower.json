@@ -5,11 +5,11 @@
     "polymer": "Polymer/polymer#master"
   },
   "homepage": "https://github.com/Polymer/core-overlay",
-  "_release": "8b5781eeb4",
+  "_release": "9ba2bbc62d",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "8b5781eeb4385fcffb04bae8787e5d29a5130716"
+    "commit": "9ba2bbc62dfc36d9c463c748a9fe0fdc27ed25e8"
   },
   "_source": "git://github.com/Polymer/core-overlay.git",
   "_target": "master",
