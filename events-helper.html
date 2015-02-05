@@ -1,0 +1,86 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<script>
+
+  modulate('events-helper', function() {
+
+    return {
+
+      /**
+       * Listens for a set of events on a node.
+       */
+      addElementListenerList: function(node, events) {
+        for (var i in events) {
+          this.addElementListener(node, i, events[i]);
+        }
+      },
+
+      /**
+       * Removes a set of event listeners from a node.
+       */
+      removeElementListenerList: function(node, events) {
+        for (var i in events) {
+          this.removeElementListener(node, i, events[i]);
+        }
+      },
+
+      /**
+       * Toggles an event listener on a node.
+       */
+      enableElementListener: function(enable, node, event, methodName, capture) {
+        if (enable) {
+          this.addElementListener(node, event, methodName, capture);
+        } else {
+          this.removeElementListener(node, event, methodName, capture);
+        }
+      },
+
+      /**
+       * Add an event listener on a node.
+       */
+      addElementListener: function(node, event, methodName, capture) {
+        var fn = this._makeBoundListener(methodName);
+        if (node && fn) {
+          node.addEventListener(event, fn, capture);
+        }
+      },
+
+      /**
+       * Removes an event listener on a node.
+       */
+      removeElementListener: function(node, event, methodName, capture) {
+        var fn = this._makeBoundListener(methodName);
+        if (node && fn) {
+          node.removeEventListener(event, fn, capture);
+        }
+      },
+
+      _makeBoundListener: function(methodName) {
+        var self = this, method = this[methodName];
+        if (!method) {
+          return;
+        }
+        var bound = '_bound' + methodName;
+        if (!this[bound]) {
+          this[bound] = function(e) {
+            method.call(self, e);
+          };
+        }
+        return this[bound];
+      }
+
+    }
+
+  });
+
+</script>

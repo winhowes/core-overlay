@@ -132,7 +132,8 @@ object like this: `{v: 'top', h: 'right'}`.
       is: 'core-overlay',
 
       mixins: [
-        'constrain-size'
+        'constrain-size',
+        'events-helper'
       ],
 
       published: {
@@ -661,10 +662,10 @@ object like this: `{v: 'top', h: 'right'}`.
       },
 
       keydownHandler: function(e) {
-        // if (!this.autoCloseDisabled && (e.keyCode == this.keyHelper.ESCAPE_KEY)) {
-        //   this.close();
-        //   e.stopPropagation();
-        // }
+        if (!this.autoCloseDisabled && (e.keyCode == this.eventKeyCodes.ESCAPE_KEY)) {
+          this.close();
+          e.stopPropagation();
+        }
       },
 
       /**
@@ -678,6 +679,7 @@ object like this: `{v: 'top', h: 'right'}`.
       },
 
       // TODO(sorvell): these utility methods should not be here.
+      /*
       addElementListenerList: function(node, events) {
         for (var i in events) {
           this.addElementListener(node, i, events[i]);
@@ -725,6 +727,7 @@ object like this: `{v: 'top', h: 'right'}`.
         }
         return this[bound];
       }
+      */
 
     });
 
