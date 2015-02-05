@@ -1,0 +1,98 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <title>core-overlay basic tests</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents.js"></script>
+
+    <script src="../../test-fixture/test-fixture-mocha.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../../test-fixture/test-fixture.html">
+    <link rel="import" href="../core-overlay.html">
+
+    <style>
+      body {
+        margin: 0;
+        height: 100%;
+      }
+
+      .overlay {
+        height: 200px;
+        width: 200px;
+        border: 1px solid black;
+        padding: 10px;
+      }
+    </style>
+
+  </head>
+  <body onclick="clickHandler(event);">
+
+    <test-fixture id="basic">
+      <template>
+        <core-overlay class="overlay">
+          Basic Overlay
+        </core-overlay>
+      </template>
+    </test-fixture>
+
+    <script>
+
+      suite('basic', function() {
+
+        setup(function() {
+          var overlay = fixture('basic');
+        });
+
+        teardown(function() {
+          overlay.unregisterSelf();
+        });
+
+        test('basic overlay starts hidden', function() {
+          assert.isFalse(overlay.opened, false, 'overlay starts closed');
+          assert.equal(getComputedStyle(overlay).display, 'none', 'overlay starts hidden');
+        });
+
+        test('basic overlay events', function(done) {
+          var nevents = 0;
+
+          overlay.addEventListener('core-overlay-open', function() {
+            nevents += 1;
+          });
+
+          overlay.addEventListener('core-overlay-open-completed', function() {
+            nevents += 1;
+            overlay.async(function() {
+              this.opened = false;
+            }, 1);
+          });
+
+          overlay.addEventListener('core-overlay-close-completed', function() {
+            nevents += 1;
+            assert.equal(nevents, 4, 'open and open-completed events fired');
+            done();
+          });
+
+          overlay.opened = true;
+        });
+
+      });
+
+    </script>
+
+  </body>
+</html>
