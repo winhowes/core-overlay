@@ -13,10 +13,10 @@
     "url": "git://github.com/Polymer/core-overlay.git"
   },
   "dependencies": {
-    "polymer": "Polymer/polymer#0.8-preview",
+    "polymer": "Polymer/polymer#0.8-preview"
   },
   "devDependencies": {
     "test-fixture": "Polymer/test-fixture#master",
-    "web-component-tester": "Polymer/web-component-tester#^2.2.3",
+    "web-component-tester": "Polymer/web-component-tester#^2.2.3"
   }
 }
