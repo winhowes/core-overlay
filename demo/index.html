@@ -41,17 +41,33 @@
         font-size: 16px;
       }
 
-      .dialog {
-        padding: 24px;
-        box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
+      .relative {
+        position: relative;
       }
 
-      .with-margin {
+      .dialog {
+        padding: 24px;
+        box-shadow: rgba(0, 0, 0, 0.24) -2.3408942051048403px 5.524510324047423px 12.090680100755666px 0px, rgba(0, 0, 0, 0.12) 0px 0px 12px 0px;
+      }
+
+      .dialog.with-margin {
         margin: 24px 40px;
       }
 
       .full-height {
         height: 100%;
+      }
+
+      .dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        padding: 8px 16px;
+        box-shadow: rgba(0, 0, 0, 0.24) -0.7802980683682801px 1.8415034413491411px 4.010025062656641px 0px, rgba(0, 0, 0, 0.12) 0px 0px 4px 0px
+      }
+
+      .dropdown.with-margin {
+        margin: 24px;
       }
 
       .scrollable {
@@ -78,7 +94,6 @@
 
       <core-overlay id="plain" class="dialog">
         Hello world!
-        <input>
       </core-overlay>
 
       <button data-dialog="scrolling">scrolling</button>
@@ -130,6 +145,48 @@
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
         </div>
       </core-overlay>
+
+      <button data-dialog="multiple">multiple</button>
+
+      <core-overlay id="multiple" class="dialog">
+        <p>click to open another overlay</p>
+        <p><button data-dialog="multiple2">click</button></p>
+      </core-overlay>
+
+      <core-overlay id="multiple2" class="dialog">
+        Hi!
+      </core-overlay>
+
+      <button data-dialog="backdrop">backdrop</button>
+
+      <core-overlay id="backdrop" class="dialog">
+        Hello world!
+      </core-overlay>
+
+    </section>
+
+    <section>
+
+      <h1>Drop-downs</h1>
+
+      <div class="relative">
+        <button data-dialog="dropdown">drop-down</button>
+        <core-overlay id="dropdown" class="dropdown">
+          Hello world!
+        </core-overlay>
+      </div>
+
+    </section>
+
+    <section>
+
+      <h1>Tooltips</h1>
+
+    </section>
+
+    <section>
+
+      <h1>Toasts and Snackbars</h1>
 
     </section>
 

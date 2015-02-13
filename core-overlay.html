@@ -116,7 +116,6 @@ Fired when the user cancels the `core-overlay`.
 
   <style>
     core-overlay {
-      position: relative;
       background: #fff;
     }
 
@@ -207,13 +206,11 @@ Fired when the user cancels the `core-overlay`.
         */
         layered: Boolean,
 
-        closeOnEvent: Boolean,
+        closeonevent: String,
 
-        closeOnEscKey: Boolean,
+        cancelonexternalevent: String,
 
-        closeOnOutsideEvent: Boolean,
-
-        cancelKeyCode: Number,
+        cancelkeycode: Number,
 
         /**
          * This property specifies an event that should close the overlay.
@@ -222,7 +219,7 @@ Fired when the user cancels the `core-overlay`.
          * @type String
          * @default "tap"
          */
-        closeEvent: String,
+        closeevent: String,
 
         /**
          * This property specifies an attribute on elements that should
@@ -233,7 +230,7 @@ Fired when the user cancels the `core-overlay`.
          * @type string
          * @default "core-overlay-toggle"
          */
-        closeAttribute: String,
+        closeattribute: String,
 
         /**
          * This property specifies a selector matching elements that should
@@ -244,7 +241,7 @@ Fired when the user cancels the `core-overlay`.
          * @type string
          * @default ""
          */
-        closeSelector: String,
+        closeselector: String,
 
         /**
          * By default an overlay will close automatically if the user
@@ -284,13 +281,6 @@ Fired when the user cancels the `core-overlay`.
         opened: 'openedChanged'
       },
 
-      // captureEventName: 'tap',
-      // targetListeners: {
-      //   'tap': 'tapHandler',
-      //   'keydown': 'keydownHandler',
-      //   // 'core-transitionend': 'transitionend'
-      // },
-
       attached: function() {
         // this.resizerAttachedHandler();
       },
@@ -303,41 +293,39 @@ Fired when the user cancels the `core-overlay`.
         return this.opened;
       },
 
-      xregisterCallback: function(element) {
-        // this.layer = document.createElement('core-overlay-layer');
-        // this.keyHelper = document.createElement('core-key-helper');
-        // this.meta = document.createElement('core-transition');
-        this.scrim = document.createElement('div');
-        this.scrim.className = 'core-overlay-backdrop';
-      },
-
       get targetListeners() {
         var listeners = {
           'keydown': 'onKeydown',
         };
-        listeners[this.closeEvent] = 'onCloseEvent';
+        listeners['click'] = 'onCloseEvent';
         return listeners;
       },
 
       configure: function() {
+        var backdropEl = document.createElement('div');
+        backdropEl.className = 'core-overlay-backdrop';
         return {
           opened: false,
           backdrop: false,
+          backdropEl: backdrop,
           layered: false,
-          closeOnEvent: false,
-          cancelOnEscKey: true,
-          cancelOnExternalEvent: 'click',
-          cancelKeyCode: this.eventKeyCodes.ESC_KEY,
-          closeEvent: 'mousedown',
-          closeAttribute: 'core-overlay-toggle',
-          closeSelector: '',
+          closeonevent: false,
+          cancelonesckey: true,
+          cancelonexternalevent: 'click',
+          cancelkeycode: this.eventKeyCodes.ESC_KEY,
+          closeevent: 'mousedown',
+          closeattribute: 'core-overlay-toggle',
+          closeselector: '',
           target: this,
+          sizingTarget: this.target || this,
           transition: 'core-transition-fade'
         }
       },
 
       ready: function() {
-        this.ensureTargetSetup();
+        this.async(function() {
+          this.ensureTargetSetup();
+        }, 10);
       },
 
       /**
@@ -421,9 +409,6 @@ Fired when the user cancels the `core-overlay`.
         if (!this.target || this.target.__overlaySetup) {
           return;
         }
-        if (!this.sizingTarget) {
-          this.sizingTarget = this.target;
-        }
         this.target.__overlaySetup = true;
         this.target.style.display = '';
         var transition = this.getTransition();
@@ -463,9 +448,9 @@ Fired when the user cancels the `core-overlay`.
         this.prepareBackdrop();
         // async so we don't auto-close immediately via a click.
         this.async(function() {
-          if (this.cancelOnExternalEvent) {
+          if (this.cancelonexternalevent) {
             this.enableElementListener(this.opened, document,
-                this.cancelOnExternalEvent, 'onCaptureEvent', true);
+                this.cancelonexternalevent, 'onCaptureEvent', true);
           }
         });
         this.enableElementListener(this.opened, window, 'resize',
@@ -525,18 +510,18 @@ Fired when the user cancels the `core-overlay`.
       },
 
       prepareBackdrop: function() {
-        // if (this.backdrop && this.opened) {
-        //   if (!this.scrim.parentNode) {
-        //     document.body.appendChild(this.scrim);
-        //     this.scrim.style.zIndex = currentOverlayZ() - 1;
-        //   }
-        //   trackBackdrop(this);
-        // }
+        if (this.backdrop && this.opened) {
+          if (!this.backdropEl.parentNode) {
+            document.body.appendChild(this.backdropEl);
+            this.backdropEl.style.zIndex = currentOverlayZ() - 1;
+          }
+          manager.trackBackdrop(this);
+        }
       },
 
       renderBackdropOpened: function() {
         if (this.backdrop && manager.getBackdrops().length < 2) {
-          // this.scrim.classList.toggle('core-opened', this.opened);
+          this.backdropEl.classList.toggle('core-opened', this.opened);
         }
       },
 
@@ -544,7 +529,7 @@ Fired when the user cancels the `core-overlay`.
         if (this.backdrop) {
           manager.trackBackdrop(this);
           if (manager.getBackdrops().length === 0) {
-            // this.scrim.parentNode.removeChild(this.scrim);
+            this.backdropEl.parentNode.removeChild(this.backdropEl);
           }
         }
       },
@@ -587,16 +572,17 @@ Fired when the user cancels the `core-overlay`.
         }
       },
 
-      tapHandler: function(e) {
+      onCloseEvent: function(e) {
+        console.log('onCloseEvent', e);
         // closeSelector takes precedence since closeAttribute has a default non-null value.
         if (e.target &&
-            (this.closeSelector && e.target.matches(this.closeSelector)) ||
-            (this.closeAttribute && e.target.hasAttribute(this.closeAttribute))) {
+            (this.closeselector && e.target.matches(this.closeselector)) ||
+            (this.closeattribute && e.target.hasAttribute(this.closeattribute))) {
           this.toggle();
         } else {
-          if (this.autoCloseJob) {
-            this.autoCloseJob.stop();
-            this.autoCloseJob = null;
+          if (this.cancelJob) {
+            this.cancelAsync(this.cancelJob);
+            this.cancelJob = null;
           }
         }
       },
@@ -609,16 +595,15 @@ Fired when the user cancels the `core-overlay`.
       // TODO(sorvell): This approach will not work with modal. For
       // this we need a scrim.
       onCaptureEvent: function(e) {
-        if (this.cancelOnExternalEvent && (manager.currentOverlay() == this)) {
-          this.cancelJob = this.debounce(this.cancelJob, function() {
+        if (this.cancelonexternalevent && (manager.currentOverlay() == this)) {
+          this.cancelJob = this.async(function() {
             this.cancel();
-          });
+          }, 10);
         }
       },
 
       onKeydown: function(e) {
-        console.log('onKeydown', this.cancelOnEscKey, e.keyCode, this.cancelKeyCode);
-        if (this.cancelOnEscKey && (e.keyCode === this.cancelKeyCode)) {
+        if (this.cancelonesckey && (e.keyCode === this.cancelkeycode)) {
           this.cancel();
           e.stopPropagation();
         }
