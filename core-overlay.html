@@ -104,9 +104,22 @@ object like this: `{v: 'top', h: 'right'}`.
 @param {Object} detail.opened the opened state
 -->
 
+<!--
+Fired when the user cancels the `core-overlay`.
+
+@event core-overlay-cancel
+@param {Object} detail
+@param {Object} detail.target the overlay target
+-->
+
 <dom-module id="core-overlay">
 
   <style>
+    core-overlay {
+      position: relative;
+      background: #fff;
+    }
+
     .core-overlay-backdrop {
       position: fixed;
       top: 0;
@@ -194,25 +207,22 @@ object like this: `{v: 'top', h: 'right'}`.
         */
         layered: Boolean,
 
-        /**
-         * By default an overlay will close automatically if the user
-         * taps outside it or presses the escape key. Disable this
-         * behavior by setting the `autoCloseDisabled` property to true.
-         * @attribute autoCloseDisabled
-         * @type boolean
-         * @default false
-         */
-        autoCloseDisabled: Boolean,
+        closeOnEvent: Boolean,
+
+        closeOnEscKey: Boolean,
+
+        closeOnOutsideEvent: Boolean,
+
+        cancelKeyCode: Number,
 
         /**
-         * By default an overlay will focus its target or an element inside
-         * it with the `autoFocus` attribute. Disable this
-         * behavior by setting the `autoFocusDisabled` property to true.
-         * @attribute autoFocusDisabled
-         * @type boolean
-         * @default false
+         * This property specifies an event that should close the overlay.
+         *
+         * @attribute closeEvent
+         * @type String
+         * @default "tap"
          */
-        autoFocusDisabled: Boolean,
+        closeEvent: String,
 
         /**
          * This property specifies an attribute on elements that should
@@ -237,6 +247,26 @@ object like this: `{v: 'top', h: 'right'}`.
         closeSelector: String,
 
         /**
+         * By default an overlay will close automatically if the user
+         * taps outside it or presses the escape key. Disable this
+         * behavior by setting the `autoCloseDisabled` property to true.
+         * @attribute autoCloseDisabled
+         * @type boolean
+         * @default false
+         */
+        // autoCloseDisabled: Boolean,
+
+        /**
+         * By default an overlay will focus its target or an element inside
+         * it with the `autoFocus` attribute. Disable this
+         * behavior by setting the `autoFocusDisabled` property to true.
+         * @attribute autoFocusDisabled
+         * @type boolean
+         * @default false
+         */
+        // autoFocusDisabled: Boolean,
+
+        /**
          * The transition property specifies a string which identifies a
          * <a href="../core-transition/">`core-transition`</a> element that
          * will be used to help the overlay open and close. The default
@@ -254,12 +284,12 @@ object like this: `{v: 'top', h: 'right'}`.
         opened: 'openedChanged'
       },
 
-      captureEventName: 'tap',
-      targetListeners: {
-        'tap': 'tapHandler',
-        'keydown': 'keydownHandler',
-        // 'core-transitionend': 'transitionend'
-      },
+      // captureEventName: 'tap',
+      // targetListeners: {
+      //   'tap': 'tapHandler',
+      //   'keydown': 'keydownHandler',
+      //   // 'core-transitionend': 'transitionend'
+      // },
 
       attached: function() {
         // this.resizerAttachedHandler();
@@ -281,26 +311,33 @@ object like this: `{v: 'top', h: 'right'}`.
         this.scrim.className = 'core-overlay-backdrop';
       },
 
+      get targetListeners() {
+        var listeners = {
+          'keydown': 'onKeydown',
+        };
+        listeners[this.closeEvent] = 'onCloseEvent';
+        return listeners;
+      },
+
       configure: function() {
         return {
           opened: false,
           backdrop: false,
           layered: false,
-          autoCloseDisabled: false,
+          closeOnEvent: false,
+          cancelOnEscKey: true,
+          cancelOnExternalEvent: 'click',
+          cancelKeyCode: this.eventKeyCodes.ESC_KEY,
+          closeEvent: 'mousedown',
           closeAttribute: 'core-overlay-toggle',
           closeSelector: '',
+          target: this,
           transition: 'core-transition-fade'
         }
       },
 
       ready: function() {
-        if (this.target === undefined) {
-          // XXX: revisit
-          this.sizingTarget = this.target = this;
-        }
-        this.async(this.ensureTargetSetup);
-        // flush to ensure styles are installed before paint
-        // Polymer.flush();
+        this.ensureTargetSetup();
       },
 
       /**
@@ -329,6 +366,16 @@ object like this: `{v: 'top', h: 'right'}`.
         this.opened = false;
       },
 
+      /**
+       * Cancels the overlay.
+       * @method cancel
+       */
+      cancel: function() {
+        this.opened = false,
+        this.fire('core-overlay-cancel', {target: this.target});
+      },
+
+      /*
       targetChanged: function(old) {
         if (this.target) {
           // really make sure tabIndex is set
@@ -351,7 +398,9 @@ object like this: `{v: 'top', h: 'right'}`.
           old.style.display = '';
         }
       },
+      */
 
+      /*
       transitionChanged: function(old) {
         if (!this.target) {
           return;
@@ -364,6 +413,7 @@ object like this: `{v: 'top', h: 'right'}`.
         }
         this.target.__overlaySetup = false;
       },
+      */
 
       // NOTE: wait to call this until we're as sure as possible that target
       // is styled.
@@ -387,6 +437,8 @@ object like this: `{v: 'top', h: 'right'}`.
         }
         style.outline = 'none';
         style.display = 'none';
+        // installing listeners here means target events cannot be configured after ready()
+        this.addElementListenerList(this.target, this.targetListeners);
       },
 
       openedChanged: function() {
@@ -411,9 +463,9 @@ object like this: `{v: 'top', h: 'right'}`.
         this.prepareBackdrop();
         // async so we don't auto-close immediately via a click.
         this.async(function() {
-          if (!this.autoCloseDisabled) {
+          if (this.cancelOnExternalEvent) {
             this.enableElementListener(this.opened, document,
-                this.captureEventName, 'captureHandler', true);
+                this.cancelOnExternalEvent, 'onCaptureEvent', true);
           }
         });
         this.enableElementListener(this.opened, window, 'resize',
@@ -556,17 +608,18 @@ object like this: `{v: 'top', h: 'right'}`.
       // if a tap event is immediately heard on the target.
       // TODO(sorvell): This approach will not work with modal. For
       // this we need a scrim.
-      captureHandler: function(e) {
-        if (!this.autoCloseDisabled && (currentOverlay() == this)) {
-          this.autoCloseJob = this.job(this.autoCloseJob, function() {
-            this.close();
+      onCaptureEvent: function(e) {
+        if (this.cancelOnExternalEvent && (manager.currentOverlay() == this)) {
+          this.cancelJob = this.debounce(this.cancelJob, function() {
+            this.cancel();
           });
         }
       },
 
-      keydownHandler: function(e) {
-        if (!this.autoCloseDisabled && (e.keyCode == this.eventKeyCodes.ESCAPE_KEY)) {
-          this.close();
+      onKeydown: function(e) {
+        console.log('onKeydown', this.cancelOnEscKey, e.keyCode, this.cancelKeyCode);
+        if (this.cancelOnEscKey && (e.keyCode === this.cancelKeyCode)) {
+          this.cancel();
           e.stopPropagation();
         }
       },
