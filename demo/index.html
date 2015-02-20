@@ -77,13 +77,38 @@
         margin: 24px;
       }
 
+      .tooltip {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 10%;
+        padding: 4px 8px;
+        margin-top: 4px;
+        border-radius: 2px;
+        font-size: 10px;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.9);
+        color: #fff;
+      }
+
+      .tooltip::after {
+        position: absolute;
+        bottom: 100%;
+        left: calc(50% - 4px);
+        border: solid transparent;
+        border-bottom-color: rgba(0,0,0,0.9);
+        content: '';
+        height: 0;
+        width: 0;
+        border-width: 4px;
+      }
+
       .snackbar {
         position: fixed;
         bottom: 32px;
         left: 32px;
         padding: 16px 24px;
         border-radius: 2px;
-        background: #212121;
+        background: rgba(0, 0, 0, 0.9);
         color: #fff;
         box-shadow: rgba(0, 0, 0, 0.24) -0.7802980683682801px 1.8415034413491411px 4.010025062656641px 0px, rgba(0, 0, 0, 0.12) 0px 0px 4px 0px
 
@@ -198,19 +223,26 @@
         Hi!
       </core-overlay>
 
-<!-- not working yet
+      <p>
+        A dialog may have a backdrop.
+      </p>
+
       <button data-dialog="backdrop">backdrop</button>
 
-      <core-overlay id="backdrop" class="dialog">
+      <core-overlay id="backdrop" class="dialog" backdrop>
         Hello world!
       </core-overlay>
--->
 
     </section>
 
     <section>
 
       <h1>Drop-downs</h1>
+
+      <p>
+        A drop-down is an overlay that appears below the element that originated it. It scrolls with
+        its scrolling container.
+      </p>
 
       <div class="relative">
         <button is="drop-down-button" data-dialog="dropdown">drop-down</button>
@@ -225,21 +257,34 @@
 
       <h1>Tooltips</h1>
 
+      <p relative data-dialog="tooltip" onmouseover="mouseoverHandler(event)" onmouseout="mouseoutHandler(event)">
+        A tooltip appears near the originating element, generally upon hover. Hover on this
+        text to show the tooltip.
+
+        <core-overlay id="tooltip" class="tooltip">
+          Help
+        </core-overlay>
+      </p>
+
     </section>
 
     <section>
 
       <h1>Toasts and Snackbars</h1>
 
+      <p>
+        A snackbar is fixed to the bottom of the viewport and auto-dismisses after a timeout.
+        Clicking outside the snackbar does not dismiss it.
+      </p>
+
       <button data-dialog="snackbar">snackbar</button>
-      <core-overlay id="snackbar" class="snackbar">Hello world!</core-overlay>
+      <core-overlay id="snackbar" class="snackbar" cancelonexternalevent=''>Hello world!</core-overlay>
 
     </section>
 
     <script>
 
       function clickHandler(e) {
-        console.log('click', e.target);
         if (!e.target.hasAttribute('data-dialog')) {
           return;
         }
@@ -251,6 +296,31 @@
           e.target.toggleAttribute && e.target.toggleAttribute('data-dialog-opened', dialog.opened);
         }
       }
+
+      function mouseoverHandler(e) {
+        var id = e.target.getAttribute('data-dialog');
+        var dialog = document.getElementById(id);
+        if (dialog) {
+          dialog.opened = true;
+        }
+      }
+
+      function mouseoutHandler(e) {
+        var id = e.target.getAttribute('data-dialog');
+        var dialog = document.getElementById(id);
+        if (dialog) {
+          dialog.opened = false;
+        }
+      }
+
+      var snackbar = document.getElementById('snackbar');
+      snackbar.addEventListener('core-overlay-open', function(e) {
+        if (e.detail) {
+          setTimeout(function() {
+            snackbar.opened = false;
+          }, 3000);
+        }
+      });
 
     </script>
 

@@ -509,7 +509,7 @@ Fired when the user cancels the `core-overlay`.
         if (this.backdrop && this.opened) {
           if (!this.backdropEl.parentNode) {
             document.body.appendChild(this.backdropEl);
-            this.backdropEl.style.zIndex = currentOverlayZ() - 1;
+            this.backdropEl.style.zIndex = manager.currentOverlayZ() - 1;
           }
           manager.trackBackdrop(this);
         }
@@ -524,7 +524,7 @@ Fired when the user cancels the `core-overlay`.
       completeBackdrop: function() {
         if (this.backdrop) {
           manager.trackBackdrop(this);
-          if (manager.getBackdrops().length === 0) {
+          if (manager.getBackdrops().length === 0 && this.backdropEl.parentNode) {
             this.backdropEl.parentNode.removeChild(this.backdropEl);
           }
         }
