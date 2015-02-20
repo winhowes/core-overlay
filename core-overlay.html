@@ -9,11 +9,6 @@
 -->
 
 <link rel="import" href="../polymer/polymer.html">
-<!-- <link rel="import" href="../core-transition/core-transition.html"> -->
-<!-- <link rel="import" href="../core-resizable/core-resizable.html">
-<link rel="import" href="core-key-helper.html">
-<link rel="import" href="core-overlay-layer.html">
- -->
 
 <link rel="import" href="core-overlay-layer.html">
 <link rel="import" href="constrain-size.html">
@@ -304,10 +299,11 @@ Fired when the user cancels the `core-overlay`.
       configure: function() {
         var backdropEl = document.createElement('div');
         backdropEl.className = 'core-overlay-backdrop';
+
         return {
           opened: false,
           backdrop: false,
-          backdropEl: backdrop,
+          backdropEl: backdropEl,
           layered: false,
           closeonevent: false,
           cancelonesckey: true,

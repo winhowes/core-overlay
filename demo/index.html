@@ -18,8 +18,12 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
 
     <script src="../../webcomponentsjs/webcomponents.js"></script>
+
+    <link rel="import" href="../../layout/layout.html">
     <!-- <link rel="import" href="../core-transition/core-transition-css.html"> -->
     <link rel="import" href="../core-overlay.html">
+
+    <link rel="import" href="drop-down-button.html">
 
     <style>
 
@@ -62,12 +66,27 @@
         position: absolute;
         top: 100%;
         left: 0;
+        width: 200px;
         padding: 8px 16px;
-        box-shadow: rgba(0, 0, 0, 0.24) -0.7802980683682801px 1.8415034413491411px 4.010025062656641px 0px, rgba(0, 0, 0, 0.12) 0px 0px 4px 0px
+        border-radius: 0 0 2px;
+        border: 1px solid #ccc;
+        border-top: 0;
       }
 
       .dropdown.with-margin {
         margin: 24px;
+      }
+
+      .snackbar {
+        position: fixed;
+        bottom: 32px;
+        left: 32px;
+        padding: 16px 24px;
+        border-radius: 2px;
+        background: #212121;
+        color: #fff;
+        box-shadow: rgba(0, 0, 0, 0.24) -0.7802980683682801px 1.8415034413491411px 4.010025062656641px 0px, rgba(0, 0, 0, 0.12) 0px 0px 4px 0px
+
       }
 
       .scrollable {
@@ -76,25 +95,42 @@
 
     </style>
 
-    <!--
-    core-overlay use cases:
-      * dropdown
-      * dialog
-      * toast
-    -->
-
   </head>
   <body onclick="clickHandler(event);">
+
+    <p>
+      <code>core-overlay</code> can be used to implement a variety of UI widgets that appear on top
+      of other elements.
+    </p>
+
+    <p>
+      It may be <em>cancelled</em> or <em>closed</em>. Both actions dismiss the dialog.
+      <em>Closed</em> implies that the user took explicit action to dismiss the dialog, for example
+      by clicking a button in the dialog, and <em>cancelled</em> is an implicit dismissal. By
+      default, a <code>core-overlay</code> is cancelled when the user clicks outside the element or
+      by when the user hits the <code>ESC</code> key.
+    </p>
 
     <section>
 
       <h1>Dialogs</h1>
+
+      <p>
+        Dialogs appear on top of other elements. By default, <code>core-overlay</code> is
+        centered in the viewport.
+      </p>
 
       <button data-dialog="plain">plain</button>
 
       <core-overlay id="plain" class="dialog">
         Hello world!
       </core-overlay>
+
+      <p>
+        <code>core-overlay</code> constrains its size to fit inside the viewport. To implement a
+        dialog that scrolls on overflow, either make it or a child element `overflow:auto`. You can
+        also set the `margin` property to set margins around the dialog.
+      </p>
 
       <button data-dialog="scrolling">scrolling</button>
 
@@ -146,6 +182,11 @@
         </div>
       </core-overlay>
 
+      <p>
+        It's possible to open other overlays on top of an overlay. `core-overlay` manages the opened
+        overlays so they are closed in the order of opening.
+      </p>
+
       <button data-dialog="multiple">multiple</button>
 
       <core-overlay id="multiple" class="dialog">
@@ -157,11 +198,13 @@
         Hi!
       </core-overlay>
 
+<!-- not working yet
       <button data-dialog="backdrop">backdrop</button>
 
       <core-overlay id="backdrop" class="dialog">
         Hello world!
       </core-overlay>
+-->
 
     </section>
 
@@ -170,7 +213,7 @@
       <h1>Drop-downs</h1>
 
       <div class="relative">
-        <button data-dialog="dropdown">drop-down</button>
+        <button is="drop-down-button" data-dialog="dropdown">drop-down</button>
         <core-overlay id="dropdown" class="dropdown">
           Hello world!
         </core-overlay>
@@ -188,11 +231,15 @@
 
       <h1>Toasts and Snackbars</h1>
 
+      <button data-dialog="snackbar">snackbar</button>
+      <core-overlay id="snackbar" class="snackbar">Hello world!</core-overlay>
+
     </section>
 
     <script>
 
       function clickHandler(e) {
+        console.log('click', e.target);
         if (!e.target.hasAttribute('data-dialog')) {
           return;
         }
@@ -201,6 +248,7 @@
         var dialog = document.getElementById(id);
         if (dialog) {
           dialog.toggle();
+          e.target.toggleAttribute && e.target.toggleAttribute('data-dialog-opened', dialog.opened);
         }
       }
 

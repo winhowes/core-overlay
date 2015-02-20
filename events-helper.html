@@ -10,6 +10,15 @@
 
 <link rel="import" href="../polymer/polymer.html">
 
+<!--
+
+`events-helper` is a mixin containing helper functions to work with events.
+
+@group Polymer Mixins
+@element events-helper
+@homepage github.io
+-->
+
 <script>
 
   modulate('events-helper', function() {
@@ -18,6 +27,10 @@
 
       /**
        * Listens for a set of events on a node.
+       *
+       * @method addElementListenerList
+       * @param {Node} node
+       * @param {Object} events eventname,methodname pairs
        */
       addElementListenerList: function(node, events) {
         for (var i in events) {
@@ -27,6 +40,10 @@
 
       /**
        * Removes a set of event listeners from a node.
+       *
+       * @method removeElementListenerList
+       * @param {Node} node
+       * @param {Object} events eventname,methodname pairs
        */
       removeElementListenerList: function(node, events) {
         for (var i in events) {
@@ -36,6 +53,13 @@
 
       /**
        * Toggles an event listener on a node.
+       *
+       * @method enableElementListener
+       * @param {Boolean} enable
+       * @param {Node} node
+       * @param {String} event
+       * @param {String} methodName
+       * @param {Boolean} capture
        */
       enableElementListener: function(enable, node, event, methodName, capture) {
         if (enable) {
@@ -47,6 +71,12 @@
 
       /**
        * Add an event listener on a node.
+       *
+       * @method addElementListener
+       * @param {Node} node
+       * @param {String} event
+       * @param {String} methodName
+       * @param {Boolean} capture
        */
       addElementListener: function(node, event, methodName, capture) {
         var fn = this._makeBoundListener(methodName);
@@ -57,6 +87,12 @@
 
       /**
        * Removes an event listener on a node.
+       *
+       * @method removeElementListener
+       * @param {Node} node
+       * @param {String} event
+       * @param {String} methodName
+       * @param {Boolean} capture
        */
       removeElementListener: function(node, event, methodName, capture) {
         var fn = this._makeBoundListener(methodName);
