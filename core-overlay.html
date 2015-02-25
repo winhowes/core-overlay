@@ -11,9 +11,9 @@
 <link rel="import" href="../polymer/polymer.html">
 
 <link rel="import" href="core-overlay-layer.html">
-<link rel="import" href="constrain-size.html">
 <link rel="import" href="events-helper.html">
 <link rel="import" href="overlay-manager.html">
+<link rel="import" href="overlay-position-helper.html">
 
 <!--
 The `core-overlay` element displays overlayed on top of other content. It starts
@@ -276,14 +276,6 @@ Fired when the user cancels the `core-overlay`.
         opened: 'openedChanged'
       },
 
-      attached: function() {
-        // this.resizerAttachedHandler();
-      },
-
-      detached: function() {
-        // this.resizerDetachedHandler();
-      },
-
       resizerShouldNotify: function() {
         return this.opened;
       },
@@ -322,6 +314,17 @@ Fired when the user cancels the `core-overlay`.
         this.async(function() {
           this.ensureTargetSetup();
         }, 10);
+      },
+
+      attached: function() {
+        // this.resizerAttachedHandler();
+      },
+
+      detached: function() {
+        // this.resizerDetachedHandler();
+        this.opened = false;
+        this.completeBackdrop();
+        manager.removeOverlay(this);
       },
 
       /**

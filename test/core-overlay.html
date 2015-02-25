@@ -19,8 +19,8 @@
 
     <script src="../../webcomponentsjs/webcomponents.js"></script>
 
-    <script src="../../test-fixture/test-fixture-mocha.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../test-fixture/test-fixture-mocha.js"></script>
 
     <link rel="import" href="../../test-fixture/test-fixture.html">
     <link rel="import" href="../core-overlay.html">
@@ -37,6 +37,32 @@
         border: 1px solid black;
         padding: 10px;
       }
+
+      .scrolling {
+        width: 200px;
+        overflow: auto;
+      }
+
+      .overlay-1 {
+        height: 300px;
+        width: 300px;
+        border: 1px solid black;
+        padding: 10px;
+      }
+
+      .overlay-2 {
+        height: 200px;
+        width: 200px;
+        border: 1px solid black;
+        padding: 10px;
+      }
+
+      .overlay-3 {
+        height: 100px;
+        width: 100px;
+        border: 1px solid black;
+        padding: 10px;
+      }
     </style>
 
   </head>
@@ -50,16 +76,53 @@
       </template>
     </test-fixture>
 
+    <test-fixture id="scrolling">
+      <template>
+        <core-overlay class="scrolling">
+          Scrolling Overlay
+        </core-overlay>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="multiple">
+      <template>
+        <core-overlay class="overlay-1">
+          Overlay 1
+        </core-overlay>
+        <core-overlay class="overlay-2">
+          Overlay 2
+        </core-overlay>
+        <core-overlay class="overlay-3">
+          Overlay 3
+        </core-overlay>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="backdrop-multiple">
+      <template>
+        <core-overlay backdrop class="overlay-1">
+          Overlay 1 with backdrop
+        </core-overlay>
+        <core-overlay backdrop class="overlay-2">
+          Overlay 2 with backdrop
+        </core-overlay>
+        <core-overlay backdrop class="overlay-3">
+          Overlay 3 with backdrop
+        </core-overlay>
+      </template>
+    </test-fixture>
+
     <script>
 
-      suite('basic', function() {
+      suite('basic overlay tests', function() {
+        var overlay;
 
-        setup(function() {
-          var overlay = fixture('basic');
-        });
-
-        teardown(function() {
-          overlay.unregisterSelf();
+        setup(function(done) {
+          overlay = fixture('basic');
+          // overlay is styled async
+          setTimeout(function() {
+            done();
+          }, 10);
         });
 
         test('basic overlay starts hidden', function() {
@@ -90,7 +153,91 @@
           overlay.opened = true;
         });
 
+        test('close an overlay quickly after open', function(done) {
+          // first, open the overlay
+          overlay.open();
+          overlay.async(function() {
+            // during the opening transition, close the overlay
+            this.close();
+            // wait for any exceptions to be thrown until the transition is done
+            this.async(function() {
+              done();
+            }, 300);
+          });
+        });
+
       });
+
+      function runAfterOpen(overlay, cb) {
+        overlay.addEventListener('core-overlay-open-completed', function() {
+          cb();
+        });
+        overlay.open();
+      }
+
+      suite('multiple overlays', function() {
+        var overlays;
+
+        setup(function(done) {
+          overlays = fixture('multiple');
+          setTimeout(done, 10);
+        });
+
+        test('new overlays appear on top', function(done) {
+          overlays[0].open();
+          overlays[1].open();
+
+          setTimeout(function() {
+            style = window.getComputedStyle(overlays[0]);
+            style1 = window.getComputedStyle(overlays[1]);
+            assert.isTrue(style1.zIndex > style.zIndex);
+            done();
+          }, 300);
+        });
+      });
+
+      suite('overlays with backdrop', function() {
+        var overlays;
+
+        setup(function(done) {
+          overlays = fixture('backdrop-multiple');
+          setTimeout(done, 10);
+        });
+
+        test('backdrop appears behind the overlay', function(done) {
+          runAfterOpen(overlays[0], function() {
+            assert.isDefined(overlays[0].backdropEl);
+            assert.isDefined(overlays[0].backdropEl.parentNode);
+
+            style = window.getComputedStyle(overlays[0]);
+            backdropStyle = window.getComputedStyle(overlays[0].backdropEl);
+            assert.isTrue(style.zIndex > backdropStyle.zIndex);
+            done();
+          });
+        });
+
+        test('backdrop is removed when the element is removed from DOM', function(done) {
+          runAfterOpen(overlays[0], function() {
+            var backdrop = overlays[0].backdropEl;
+            overlays[0].remove();
+            assert.isNull(backdrop.parentNode);
+            done();
+          });
+        });
+
+        test('backdrop appears behind the overlay', function(done) {
+          runAfterOpen(overlays[0], function() {
+            assert.isDefined(overlays[0].backdropEl);
+            assert.isDefined(overlays[0].backdropEl.parentNode);
+
+            style = window.getComputedStyle(overlays[0]);
+            backdropStyle = window.getComputedStyle(overlays[0].backdropEl);
+            assert.isTrue(style.zIndex > backdropStyle.zIndex);
+            done();
+          });
+        });
+      });
+
 
     </script>
 
