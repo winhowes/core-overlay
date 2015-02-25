@@ -114,6 +114,13 @@
 
     <script>
 
+      function runAfterOpen(overlay, cb) {
+        overlay.addEventListener('core-overlay-open-completed', function() {
+          cb();
+        });
+        overlay.open();
+      }
+
       suite('basic overlay tests', function() {
         var overlay;
 
@@ -125,12 +132,12 @@
           }, 10);
         });
 
-        test('basic overlay starts hidden', function() {
+        test('overlay starts hidden', function() {
           assert.isFalse(overlay.opened, false, 'overlay starts closed');
           assert.equal(getComputedStyle(overlay).display, 'none', 'overlay starts hidden');
         });
 
-        test('basic overlay events', function(done) {
+        test('overlay open/close events', function(done) {
           var nevents = 0;
 
           overlay.addEventListener('core-overlay-open', function() {
@@ -167,13 +174,6 @@
         });
 
       });
-
-      function runAfterOpen(overlay, cb) {
-        overlay.addEventListener('core-overlay-open-completed', function() {
-          cb();
-        });
-        overlay.open();
-      }
 
       suite('multiple overlays', function() {
         var overlays;
