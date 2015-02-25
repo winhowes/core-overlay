@@ -17,11 +17,39 @@ vertically unless it is already positioned.
 
 -->
 
+
 <script>
 
-  modulate('constrain-size', function() {
+  modulate('overlay-position-helper', function() {
 
     return {
+
+      /**
+       * The element that will be positioned.
+       *
+       * @attribute target
+       * @type Node
+       */
+
+      /**
+       * The element that will be sized with a max-height/width. By default this element is the
+       * target element, but it can be specifically set to a specific element inside the target
+       * if that is more appropriate. This is useful, for example, when a region inside the overlay
+       * should scroll if needed.
+       *
+       * @attribute sizingTarget
+       * @type Node
+       */
+
+
+      /**
+       * This object memoizes information needed to position and size the target element. By default
+       * the target element is centered along an axis if it is not positioned otherwise. Its size
+       * is constrained to the window size unless a max- or min-width/height is set.
+       *
+       * @attribute dimensions
+       * @type Object
+       */
 
       /**
        * Memoize information needed to position and size the target element.

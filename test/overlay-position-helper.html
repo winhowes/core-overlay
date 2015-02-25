@@ -1,0 +1,215 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <title>overlay-position-helper tests</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents.js"></script>
+
+    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+    <link rel="import" href="../../test-fixture/test-fixture.html">
+    <link rel="import" href="elements/overlay-position-helper-impl.html">
+
+    <style>
+      body {
+        margin: 0;
+        height: 100%;
+      }
+
+      overlay-position-helper-impl {
+        padding: 10px;
+        position: fixed;
+      }
+
+      .sized-x {
+        width: 200px;
+      }
+
+      .sized-y {
+        height: 200px;
+      }
+
+      .positioned-left {
+        left: 0;
+      }
+
+      .positioned-right {
+        right: 0;
+      }
+
+      .positioned-top {
+        top: 0;
+      }
+
+      .positioned-bottom {
+        bottom: 0;
+      }
+
+      .with-max-width {
+        max-width: 500px;
+      }
+
+      .with-max-height {
+        max-height: 500px;
+      }
+
+      .with-margin {
+        margin: 20px;
+      }
+    </style>
+
+  </head>
+  <body onclick="clickHandler(event);">
+
+    <test-fixture id="sized-xy">
+      <template>
+        <overlay-position-helper-impl class="sized-x sized-y">
+          Sized overlay, auto center/center
+        </overlay-position-helper-impl>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="sized-x">
+      <template>
+        <overlay-position-helper-impl class="sized-x">
+          Sized overlay, auto center/center
+        </overlay-position-helper-impl>
+      </template>
+    </test-fixture>
+
+    <template id="ipsum">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </template>
+
+    <script>
+
+      suite('auto centered and sized overlay', function() {
+        var overlay;
+
+        setup(function() {
+          overlay = fixture('sized-xy');
+        });
+
+        test('discoverDimensions return correct data', function() {
+          overlay.discoverDimensions();
+          assert.deepEqual(overlay.dimensions, {
+            position: {
+              v: null,
+              h: null,
+              css: 'fixed'
+            },
+            size: {
+              v: false,
+              h: false
+            },
+            margin: {
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0
+            }
+          });
+        });
+
+        test('overlay is centered in viewport', function() {
+          overlay.discoverDimensions();
+          overlay.updateTargetDimensions();
+          var rect = overlay.getBoundingClientRect();
+          assert.closeTo(rect.left - (window.innerWidth - rect.right), 0, 5);
+          assert.closeTo(rect.top - (window.innerHeight - rect.bottom), 0, 5);
+        });
+
+      });
+
+      suite('scrolling, auto centered overlay', function() {
+        var overlay;
+
+        setup(function() {
+          overlay = fixture('sized-x');
+
+          var template = document.getElementById('ipsum');
+          for (var i = 0; i < 20; i++) {
+            overlay.appendChild(template.content.cloneNode(true));
+          }
+          overlay.discoverDimensions();
+          overlay.updateTargetDimensions();
+        });
+
+        test('overlay is centered in viewport', function() {
+          var rect = overlay.getBoundingClientRect();
+          assert.closeTo(rect.left - (window.innerWidth - rect.right), 0, 5);
+          assert.closeTo(rect.top - (window.innerHeight - rect.bottom), 0, 5);
+        });
+
+        test('overlay is constrained to viewport height', function() {
+          var rect = overlay.getBoundingClientRect();
+          assert.isTrue(rect.height <= window.innerHeight, 'height is less than or equal to viewport height');
+        });
+      });
+
+      suite('scrolling, auto centered overlay with max height', function() {
+        var overlay;
+
+        setup(function() {
+          overlay = fixture('sized-x');
+          overlay.classList.add('with-max-height');
+
+          var template = document.getElementById('ipsum');
+          for (var i = 0; i < 20; i++) {
+            overlay.appendChild(template.content.cloneNode(true));
+          }
+          overlay.discoverDimensions();
+          overlay.updateTargetDimensions();
+        });
+
+        test('discoverDimensions return correct data', function() {
+          assert.deepEqual(overlay.dimensions, {
+            position: {
+              v: null,
+              h: null,
+              css: 'fixed'
+            },
+            size: {
+              v: true,
+              h: false
+            },
+            margin: {
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0
+            }
+          });
+        });
+
+        test('overlay is centered in viewport', function() {
+          var rect = overlay.getBoundingClientRect();
+          assert.closeTo(rect.left - (window.innerWidth - rect.right), 0, 5);
+          assert.closeTo(rect.top - (window.innerHeight - rect.bottom), 0, 5);
+        });
+
+        test('overlay is constrained to max height', function() {
+          var rect = overlay.getBoundingClientRect();
+          assert.isTrue(rect.height <= 500, 'height is less than or equal to max-height');
+        });
+      });
+
+    </script>
+
+  </body>
+</html>
