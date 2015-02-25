@@ -43,7 +43,7 @@
 
   <template>
 
-    <div flex><content></content></div>
+    <div class="flex"><content></content></div>
     <div><core-icon icon="{{icon}}"></core-icon></div>
 
   </template>
@@ -58,7 +58,9 @@
 
     extends: 'button',
 
-    hostAttributes: 'layout horizontal center',
+    created: function() {
+      this.classList.add('layout', 'horizontal', 'center');
+    },
 
     configure: function() {
       return {
